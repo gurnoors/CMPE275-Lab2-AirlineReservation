@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.springJPA.airline.model.Passenger;
 
 
-public interface AirlineRepository extends CrudRepository<Passenger, String>{
+public interface PassengerRepository extends CrudRepository<Passenger, String>{
 	//List<Passenger> findByLastName(String lastName);
 	
 	@Transactional

@@ -8,10 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 //@javax.persistence.Entity(name = "passenger")
 @Entity
-@Table(name = "passenger")
+@Table(name = "passenger", uniqueConstraints = {@UniqueConstraint(columnNames={"phone"})})
 public class Passenger implements Serializable {
 
 	private static final long serialVersionUID = -7954044712529235759L;
@@ -39,14 +40,6 @@ public class Passenger implements Serializable {
 	}
 
 	public Passenger(String firstName, String lastName, int age, String gender, String phone) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.age = age;
-		this.gender = gender;
-		this.phone = phone;
-	}
-	public Passenger(String id, String firstName, String lastName, int age, String gender, String phone) {
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.age = age;
@@ -109,3 +102,15 @@ public class Passenger implements Serializable {
 	}
 
 }
+/*
+ CREATE TABLE passenger(
+   id INT NOT NULL AUTO_INCREMENT,
+   firstname VARCHAR(20) NOT NULL,
+   lastname VARCHAR(20) NOT NULL,
+   age INT,
+   gender VARCHAR(10),
+   phone VARCHAR(10),
+   PRIMARY KEY (id),
+   UNIQUE(phone)
+);
+*/
