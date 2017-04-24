@@ -8,28 +8,25 @@ CREATE TABLE passenger(
    PRIMARY KEY (id),
    UNIQUE(phone)
 );
-CREATE TABLE flight(
-   number VARCHAR(10) NOT NULL,
-   price INT,
-   fromSrc VARCHAR(20) NOT NULL,
-   toDest VARCHAR(20) NOT NULL,
-   departureTime DATE,
-   arrivalTime DATE,
-   seatsLeft INT,
-   model VARCHAR(10),
-   PRIMARY KEY (number)
-);
 CREATE TABLE reservation(
-   orderNumber VARCHAR(10) NOT NULL,
-   pId VARCHAR(10),
-   flights VARCHAR(10),
+   orderno INT NOT NULL AUTO_INCREMENT, 
+   pid VARCHAR(10),
+   flights VARCHAR(20),
    price INT,
-   PRIMARY KEY (orderNumber)
+   PRIMARY KEY (orderno)
 );
-CREATE TABLE reservation(
-   capacity INT,
-   model VARCHAR(10),
-   manufacturer VARCHAR(10), 
-   yearOfManufacture INT,
-   PRIMARY KEY (model)
+CREATE TABLE flight (
+  number varchar(255) NOT NULL,
+  arrival_time datetime,
+  departure_time datetime,
+  description varchar(255),
+  from_src varchar(255),
+  capacity int(11) NOT NULL,
+  manufacturer varchar(255),
+  model varchar(255),
+  year_of_manufacture int(11) NOT NULL,
+  price int(11),
+  seats_left int(11),
+  to_dest varchar(255),
+  PRIMARY KEY (number)
 );
