@@ -46,6 +46,7 @@ public class Passenger implements Serializable {
 		this.gender = gender;
 		this.phone = phone;
 	}
+	
 /*
 	@Override
 	public String toString() {

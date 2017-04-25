@@ -23,6 +23,8 @@ public class Plane{ // implements Serializable{
         this.yearOfManufacture=yearOfManufacture;
     }
 	
+	public Plane(){}
+	
 	public String getModel() {
 		return model;
 	}

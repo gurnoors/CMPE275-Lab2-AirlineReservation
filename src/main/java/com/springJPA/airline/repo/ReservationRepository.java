@@ -16,9 +16,9 @@ import com.springJPA.airline.model.Reservation;
 public interface ReservationRepository extends CrudRepository<Reservation, String>{
 	//List<Passenger> findByLastName(String lastName);
 	
-	@Transactional
-    @Modifying(clearAutomatically = true)
-	@Query("update Passenger p set p.firstName=?1, p.lastName=?2, p.age=?3, p.gender=?4, p.phone=?5 where p.id=?6")
-	void updatePassengerDetails(String firstname, String lastname, int age, String gender, String phone, String id);
+//	@Transactional
+//    @Modifying(clearAutomatically = true)
+//	@Query("update Passenger p set p.firstName=?1, p.lastName=?2, p.age=?3, p.gender=?4, p.phone=?5 where p.id=?6")
+//	void updatePassengerDetails(String firstname, String lastname, int age, String gender, String phone, String id);
 	
 }

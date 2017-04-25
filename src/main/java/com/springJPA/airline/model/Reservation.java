@@ -40,6 +40,8 @@ public class Reservation implements Serializable{
 		this.price = getPrice(flights);
 	}
 
+	public Reservation(){}
+	
 	private int getPrice(String flights) {
 		// TODO Auto-generated method stub
 		return 240;

@@ -54,6 +54,8 @@ public class Flight implements Serializable{
 		this.description = description;
 		this.plane = plane;
 	}
+	
+	public Flight(){}
 
 	public String getNumber() {
 		return number;
