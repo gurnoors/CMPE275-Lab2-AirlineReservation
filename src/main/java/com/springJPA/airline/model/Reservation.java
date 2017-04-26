@@ -3,8 +3,11 @@ package com.springJPA.airline.model;
 import java.io.Serializable;
 //import java.util.Arrays;
 //import java.util.List;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 //import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,26 +20,31 @@ import javax.persistence.Table;
 public class Reservation implements Serializable{
 
 	private static final long serialVersionUID = -8261334108709924377L;
-	//private List<String> listFlights;
+	
+//	private String orderno;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "orderno")
-	private String orderno;
+	private int orderno;
 	
 	@Column(name = "pid")
 	private String pid;
 	
-	@Column(name = "flights")
-	private String flights;
+//	@Column(name = "flights")
+//	private String flights;
+	
+//	@CollectionTable(name="")
+	@ElementCollection
+	private List<String> listFlights;
 	
 	@Column(name = "price")
 	private int price;
 	
 	public Reservation(String pid, String flights) {
 		this.pid = pid;
-		this.flights = flights; //Arrays.asList(lFlights.split("\\s*,\\s*"));
-		//this.listFlights = Arrays.asList(lFlights.split("\\s*,\\s*"));
+//		this.flights = flights; //Arrays.asList(lFlights.split("\\s*,\\s*"));
+		this.listFlights = Arrays.asList(flights.split("\\[,\\]"));
 		this.price = getPrice(flights);
 	}
 
@@ -47,11 +55,11 @@ public class Reservation implements Serializable{
 		return 240;
 	}
 
-	public String getOrderno() {
+	public int getOrderno() {
 		return orderno;
 	}
 
-	public void setOrderno(String orderNumber) {
+	public void setOrderno(int orderNumber) {
 		this.orderno = orderNumber;
 	}
 
@@ -62,7 +70,7 @@ public class Reservation implements Serializable{
 	public void setPid(String pid) {
 		this.pid = pid;
 	}
-	/*
+	
 	public List<String> getlistFlights() {
 		return listFlights;
 	}
@@ -70,14 +78,14 @@ public class Reservation implements Serializable{
 	public void setlistFlights(List<String> listFlights) {
 		this.listFlights = listFlights;
 	}
-	*/
-	public String getFlights() {
-		return flights;
-	}
-
-	public void setFlights(String flights) {
-		this.flights = flights;
-	}
+	
+//	public String getFlights() {
+//		return flights;
+//	}
+//
+//	public void setFlights(String flights) {
+//		this.flights = flights;
+//	}
 	
 	public int getPrice() {
 		return price;

@@ -19,7 +19,7 @@ public class Passenger implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private String id;
+	private int id;
 
 	@Column(name = "firstname")
 	private String firstName;
@@ -54,7 +54,7 @@ public class Passenger implements Serializable {
 	}
 */
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -78,7 +78,7 @@ public class Passenger implements Serializable {
 		return phone;
 	}
 	
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

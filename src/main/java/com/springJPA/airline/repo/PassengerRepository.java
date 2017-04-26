@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.springJPA.airline.model.Passenger;
 
 
-public interface PassengerRepository extends CrudRepository<Passenger, String>{
+public interface PassengerRepository extends CrudRepository<Passenger, Integer>{
 	//List<Passenger> findByLastName(String lastName);
 	
 	@Transactional
     @Modifying(clearAutomatically = true)
 	@Query("update Passenger p set p.firstName=?1, p.lastName=?2, p.age=?3, p.gender=?4, p.phone=?5 where p.id=?6")
-	void updatePassengerDetails(String firstname, String lastname, int age, String gender, String phone, String id);
+	void updatePassengerDetails(String firstname, String lastname, int age, String gender, String phone, int id);
 	
 }
