@@ -1,5 +1,6 @@
 package com.springJPA.airline.controller;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,9 +30,12 @@ import com.springJPA.airline.repo.FlightRepository;
 import com.springJPA.airline.repo.PassengerRepository;
 import com.springJPA.airline.repo.ReservationRepository;
 
+
 @RestController
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class WebController {
+	
+	
 	@Autowired
 	PassengerRepository passRepo;
 
@@ -39,7 +43,7 @@ public class WebController {
 	ReservationRepository resRepo;
 
 	@Autowired
-	FlightRepository fightRepo;
+	FlightRepository flightRepo;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String welcome() {
@@ -98,13 +102,39 @@ public class WebController {
 		return "Passenger deleted";
 	}
 
+	
 	// Spec7 - Make a reservation
 	@RequestMapping(value = "/reservation", method = { RequestMethod.POST })
 	public ResponseEntity<Reservation> makeReservation(@RequestParam String passengerId,
 			@RequestParam String flightLists) {
-		Reservation reservation = new Reservation(passengerId, flightLists);
-
-		resRepo.save(reservation);
+		if(passengerId == null || passengerId.isEmpty()){
+			//TODO return 400
+		}
+		if(flightLists == null || flightLists.isEmpty()){
+			//TODO return 400
+		}
+		Passenger passenger = passRepo.findOne(Integer.parseInt(passengerId));
+		if(passenger == null){
+			//TODO 400
+		}
+		List<Flight> flights = new ArrayList<>();
+		for(String flightId : flightLists.split("\\[,\\]")){
+			Flight flight = flightRepo.findOne(flightId);
+			if(flight == null){
+				//TODO 400
+			}
+			flights.add(flight);
+		}
+		
+		Reservation reservation = new Reservation(passenger, new ArrayList<Flight>());
+		if(isValidated(reservation, flights)){
+			reservation.setFlights(flights);
+			resRepo.save(reservation);
+		}else{
+			//TODO 400 error overlap
+		}
+		
+		
 
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
@@ -118,7 +148,7 @@ public class WebController {
 		Flight flight = new Flight(id, price, from, to, departureTime, arrivalTime, description,
 				new Plane(capacity, model, manufacturer, yearOfManufacture));
 
-		fightRepo.save(flight);
+		flightRepo.save(flight);
 		return new ResponseEntity<Flight>(flight, HttpStatus.OK);
 	}
 
@@ -142,6 +172,11 @@ public class WebController {
 			@RequestParam(required = false) String flightsRemoved) {
 		int id = Integer.parseInt(idStr);
 		Reservation reservation = resRepo.findOne(id);
+		
+		if(reservation == null){
+			//TODO error message
+			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
+		}
 
 		// remove flights
 		if (flightsRemoved != null) {
@@ -149,7 +184,7 @@ public class WebController {
 				return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
 						"flightsRemoved String empty. Remove the parameter."), HttpStatus.BAD_REQUEST);
 			}
-			Set<String> flightsInRes = new HashSet<String>(reservation.getlistFlights());
+			Set<Flight> flightsInRes = new HashSet<Flight>(reservation.getFlights());
 			for (String toRemove : flightsRemoved.split("\\[,\\]")) {
 				boolean wasPresent = flightsInRes.remove(toRemove);
 				if (!wasPresent) {
@@ -158,7 +193,7 @@ public class WebController {
 					return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
 				}
 			}
-			reservation.setlistFlights(new ArrayList<String>(flightsInRes));
+			reservation.setFlights(new ArrayList<Flight>(flightsInRes));
 		}
 
 		// add flights
@@ -168,20 +203,23 @@ public class WebController {
 						"flightsRemoved String empty. Remove the parameter."), HttpStatus.BAD_REQUEST);
 			}
 			// check all flights exist
-			List<String> flightsAddedList = Arrays.asList(flightsAdded.split("\\[,\\]"));
-			for (String flightId : flightsAddedList) {
-				if (!fightRepo.exists(flightId)) {
+			List<String> flightsAddedListStr = new ArrayList<>( Arrays.asList(flightsAdded.split("\\[,\\]")));
+			List<Flight> flightsAddedList = new ArrayList<>();
+			for (String flightId : flightsAddedListStr) {
+				if (!flightRepo.exists(flightId)) {
 					return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
 							"Flight " + flightId + " does not exist"), HttpStatus.BAD_REQUEST);
+				}else{
+					flightsAddedList.add(flightRepo.findOne(flightId));
 				}
 			}
 
 			// validate and add flights
 			if (isValidated(reservation, flightsAddedList)) {
-				List<String> updatedFlights = new ArrayList<>();
-				updatedFlights.addAll(reservation.getlistFlights());
+				List<Flight> updatedFlights = new ArrayList<>();
+				updatedFlights.addAll(reservation.getFlights());
 				updatedFlights.addAll(flightsAddedList);
-				reservation.setlistFlights(updatedFlights);
+				reservation.setFlights(updatedFlights);
 			} else {
 				return new ResponseEntity<ControllerError>(
 						new ControllerError(HttpStatus.BAD_REQUEST.value(), "Flights are overlapping"),
@@ -200,20 +238,21 @@ public class WebController {
 	 * @param flightsAdded
 	 * @return true if flights are not overlapping (and fights exist)
 	 */
-	private boolean isValidated(Reservation reservation, List<String> flightsAdded) {
-		List<Flight> existingFlights = new ArrayList<Flight>();
+	private boolean isValidated(Reservation reservation, List<Flight> flightsAdded) {
+		List<Flight> existingFlights = reservation.getFlights();
+		if(existingFlights == null)
+			existingFlights = new ArrayList<Flight>();
 		// populate list
-		if (reservation.getlistFlights() != null) {
-			for (String flightID : reservation.getlistFlights()) {
-				Flight toAdd = fightRepo.findOne(flightID);
-				if (toAdd != null) {
-					existingFlights.add(toAdd);
-				}
-			}
-		}
+//		if (reservation.getlistFlights() != null) {
+//			for (String flightID : reservation.getlistFlights()) {
+//				Flight toAdd = flightRepo.findOne(flightID);
+//				if (toAdd != null) {
+//					existingFlights.add(toAdd);
+//				}
+//			}
+//		}
 
-		for (String flightID : flightsAdded) {
-			Flight newFlight = fightRepo.findOne(flightID);
+		for (Flight newFlight : flightsAdded) {
 			for (Flight oldFlight : existingFlights) {
 				if (isOverlapping(oldFlight.getDepartureTime(), oldFlight.getArrivalTime(),
 						newFlight.getDepartureTime(), newFlight.getArrivalTime())) {
@@ -250,7 +289,7 @@ public class WebController {
 	@RequestMapping(value = "/flight/{id}", method = { RequestMethod.GET })
 	public ResponseEntity<Flight> getFlight(@PathVariable("id") String id,
 			@RequestParam(value = "json", defaultValue = "false") Boolean json) {
-		Flight flight = fightRepo.findOne(id);
+		Flight flight = flightRepo.findOne(id);
 		if (flight == null) {
 			return new ResponseEntity<Flight>(HttpStatus.NOT_FOUND);
 		}
@@ -261,11 +300,11 @@ public class WebController {
 	// spec 14 - delete a flight
 	@RequestMapping(value = "/airline/{id}", method = { RequestMethod.DELETE })
 	public ResponseEntity<Flight> deleteFlight(@PathVariable("id") String id) {
-		Flight flight = fightRepo.findOne(id);
+		Flight flight = flightRepo.findOne(id);
 		if (flight == null) {
 			return new ResponseEntity<Flight>(HttpStatus.NOT_FOUND);
 		} else {
-			fightRepo.delete(id);
+			flightRepo.delete(id);
 			// TODO
 			// return new ResponseEntity<String>("Reservation with number XXX is
 			// canceled successfully",
@@ -273,5 +312,9 @@ public class WebController {
 			return new ResponseEntity<Flight>(HttpStatus.OK);
 		}
 	}
+	
+	
 
 }
+
+

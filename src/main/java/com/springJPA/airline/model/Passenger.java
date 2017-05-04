@@ -1,12 +1,16 @@
 package com.springJPA.airline.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -35,6 +39,20 @@ public class Passenger implements Serializable {
 	
 	@Column(name = "phone")
 	private String phone;
+	
+	
+	//maybe circular
+	
+	@OneToMany //(mappedBy="passenger")
+	@JoinTable(name="passenger_reservation", 
+	joinColumns={
+			@JoinColumn(name="id")
+	},
+	inverseJoinColumns={
+			@JoinColumn(name="pid")
+	}
+			)
+	private List<Reservation> reservations;
 	
 	protected Passenger() {
 	}
@@ -101,6 +119,24 @@ public class Passenger implements Serializable {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Passenger ? this.getId() == ((Passenger) obj).getId() : false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return String.valueOf(this.getId()).hashCode();
+	}
+
+//	public List<Reservation> getReservations() {
+//		return reservations;
+//	}
+//
+//	public void setReservations(List<Reservation> reservations) {
+//		this.reservations = reservations;
+//	}
 
 }
 /*

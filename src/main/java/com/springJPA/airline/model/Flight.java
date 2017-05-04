@@ -2,49 +2,76 @@ package com.springJPA.airline.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "flight")
-public class Flight implements Serializable{
+public class Flight implements Serializable {
 
 	private static final long serialVersionUID = -8208883729985104877L;
-	
+
 	@Id
 	@Column(name = "number")
 	private String number;
-	
+
 	@Column(name = "price")
 	private int price;
-	
+
 	@Column(name = "fromSrc")
 	private String fromSrc;
-	
+
 	@Column(name = "toDest")
 	private String toDest;
-	
+
 	@Column(name = "departureTime")
 	private Date departureTime;
-	
+
 	@Column(name = "arrivalTime")
 	private Date arrivalTime;
-	
+
 	@Column(name = "seatsLeft")
 	private int seatsLeft;
-	
+
 	@Column(name = "description")
 	private String description;
-	
+
+//	public ResponseEntity<Flight> addFlight(@PathVariable("id") String id, @RequestParam int price,
+//			@RequestParam String from, @RequestParam String to, @RequestParam("departureTime") @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")Date departureTime,
+//			@RequestParam("arrivalTime") @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm") Date arrivalTime, @RequestParam String description, @RequestParam int capacity,
+//			@RequestParam String model, @RequestParam String manufacturer, @RequestParam int yearOfManufacture)
+
 	@Embedded
 	private Plane plane;
-	
-	public Flight(String number, int price, String fromSrc, String toDest, Date departureTime, Date arrivalTime, String description, 
-								Plane plane) {
+
+	// @OneToMany
+	// @JoinColumn(na)
+
+//	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//	@JoinTable(name = "passenger", joinColumns = { 
+//			
+//	}
+////			@JoinColumn(name = "number") }
+//	, inverseJoinColumns = {
+//			// wrong -> passenger table has no info on Flight
+//			// its actually a manyTpMany with Reservation table as the join
+//			// table
+//			@JoinColumn(name = "") }
+//	)
+//	private List<Passenger> passengers;
+
+	public Flight(String number, int price, String fromSrc, String toDest, Date departureTime, Date arrivalTime,
+			String description, Plane plane) {
 		this.number = number;
 		this.price = price;
 		this.fromSrc = fromSrc;
@@ -54,8 +81,9 @@ public class Flight implements Serializable{
 		this.description = description;
 		this.plane = plane;
 	}
-	
-	public Flight(){}
+
+	public Flight() {
+	}
 
 	public String getNumber() {
 		return number;
@@ -129,5 +157,20 @@ public class Flight implements Serializable{
 		this.plane = plane;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Flight){
+			Flight flight2 = (Flight) obj;
+			return this.getNumber().equals(flight2.getNumber());
+		}else{
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.number.hashCode();
+	}
+
 }
 // will create the table automatically
