@@ -76,7 +76,8 @@ public class Reservation implements Serializable {
 	// }
 
 	public Reservation(Passenger passenger, List<Flight> flights) {
-
+		this.passenger = passenger;
+		this.flights = flights;
 	}
 
 	public Reservation() {
