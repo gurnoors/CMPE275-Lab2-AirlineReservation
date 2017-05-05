@@ -24,6 +24,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.springJPA.airline.repo.PassengerRepository;
@@ -74,8 +75,9 @@ public class Reservation implements Serializable {
 
 	@ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
 	@JoinColumn(name="pid")
+//	@JsonBackReference
 //	@JsonManagedReference
-	@JsonBackReference
+	@JsonIgnore
 	private Passenger passenger;
 
 	// public Reservation(String pid, String flights) {
@@ -158,6 +160,7 @@ public class Reservation implements Serializable {
 	public int hashCode() {
 		return String.valueOf(this.getOrderno()).hashCode();
 	}
+	
 
 }
 

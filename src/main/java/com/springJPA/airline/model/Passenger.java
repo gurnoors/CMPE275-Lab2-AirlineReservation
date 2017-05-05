@@ -18,12 +18,15 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 //@javax.persistence.Entity(name = "passenger")
 @Entity
 @Table(name = "passenger", uniqueConstraints = {@UniqueConstraint(columnNames={"phone"})})
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="id")
 public class Passenger implements Serializable {
 
 	private static final long serialVersionUID = -7954044712529235759L;

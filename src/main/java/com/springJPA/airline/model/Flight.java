@@ -65,9 +65,9 @@ public class Flight implements Serializable {
 	@ManyToMany(mappedBy="flights")
 	private List<Reservation> reservations;
 	
-	@Transient
-	@JsonManagedReference
-	private List<Passenger> passengers;
+//	@Transient
+//	@JsonManagedReference
+//	private List<Passenger> passengers;
 	// @OneToMany
 	// @JoinColumn(na)
 
@@ -186,13 +186,13 @@ public class Flight implements Serializable {
 		return this.number.hashCode();
 	}
 
-	public List<Passenger> getPassengers() {
-		return passengers;
-	}
-
-	public void setPassengers(List<Passenger> passengers) {
-		this.passengers = passengers;
-	}
+//	public List<Passenger> getPassengers() {
+//		return passengers;
+//	}
+//
+//	public void setPassengers(List<Passenger> passengers) {
+//		this.passengers = passengers;
+//	}
 
 	public List<Reservation> getReservations() {
 		return reservations;
@@ -201,6 +201,7 @@ public class Flight implements Serializable {
 	public void setReservations(List<Reservation> reservations) {
 		this.reservations = reservations;
 	}
+	
 
 }
 // will create the table automatically

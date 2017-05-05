@@ -163,8 +163,55 @@ public class WebController {
 		if (res == null){
 			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
 		}else{
-			return new ResponseEntity<Reservation>(res, HttpStatus.OK);
+			ResponseEntity<String> response = new ResponseEntity<String>(jsonifyReservation(res), HttpStatus.OK);
+//			response.getHeaders().add("Content-Type", "application/json");
+			return response;
 		}
+	}
+
+	private String jsonifyReservation(Reservation res) {
+		
+		/*
+		 * "reservation": {
+		"orderNumber": "123",
+		"price": "240",
+		"passenger": {
+			"id": " 123 ",
+			"firstname": " John ",
+			"lastname": " Oliver ",
+			"age": " 21 ",
+			"gender": " male ",
+			"phone": " 4445556666 "
+		},
+		"flights": {
+
+		 * 
+		 */
+		
+		JSONObject reservationJson = new JSONObject();
+		reservationJson.put("orderNumber", res.getOrderno());
+		reservationJson.put("price", res.getPrice());
+		
+		JSONObject passengerJson = new JSONObject();
+		Passenger passenger = res.getPassenger();
+		passengerJson.put("id", String.valueOf(passenger.getId()));
+		passengerJson.put("firstName", passenger.getFirstName());
+		passengerJson.put("lastName", passenger.getLastName());
+		passengerJson.put("age", String.valueOf(passenger.getAge()));
+		passengerJson.put("gender", passenger.getGender());
+		passengerJson.put("phone", String.valueOf(passenger.getPhone()));
+		reservationJson.put("passenger", passengerJson);
+		
+		List<JSONObject> flightJsonList = new ArrayList<>();
+		for(Flight flight : res.getFlights()){
+			JSONObject flightJson = jsonifyFlight(flight);
+			flightJson.remove("passengers");
+			flightJsonList.add(flightJson);
+		}
+		
+		reservationJson.put("flights", flightJsonList);
+		
+		return reservationJson.toString();
 	}
 
 	// Spec8 - Update a reservation
@@ -284,17 +331,17 @@ public class WebController {
 		}
 		
 		//TODO: refactor: hacks 
-		List<Reservation> reservations = flight.getReservations();
-		List<Passenger> passengers = new ArrayList<>();
-		for(Reservation reservation : reservations){
-			passengers.add(reservation.getPassenger());
-		}
-		flight.setPassengers(passengers);
+//		List<Reservation> reservations = flight.getReservations();
+//		List<Passenger> passengers = new ArrayList<>();
+//		for(Reservation reservation : reservations){
+//			passengers.add(reservation.getPassenger());
+//		}
+//		flight.setPassengers(passengers);
 
-		return new ResponseEntity<String>(jsonifyFlight(flight), HttpStatus.OK);
+		return new ResponseEntity<String>(jsonifyFlight(flight).toString(), HttpStatus.OK);
 	}
 
-	private String jsonifyFlight(Flight flight) {
+	private JSONObject jsonifyFlight(Flight flight) {
 		
 		/*
 		 * 
@@ -333,13 +380,30 @@ public class WebController {
 		json.put("description", flight.getDescription());
 		json.accumulate("plane", new JSONObject(flight.getPlane()));
 		
-		List<Passenger> passengers = flight.getPassengers();
-		for(Passenger passenger : passengers){
-			passenger.setReservations(null);
+		List<Reservation> reservations = flight.getReservations();
+		List<Passenger> passengers = new ArrayList<>();
+		for(Reservation reservation : reservations){
+			passengers.add(reservation.getPassenger());
 		}
-		json.put("passengers", passengers);
+//		List<Passenger> passengers = flight.getPassengers();
+//		for(Passenger passenger : passengers){
+//			passenger.setReservations(null);
+//		}
+		List<JSONObject> passengerJsonList = new  ArrayList<>();
+		for(Passenger passenger: passengers){
+			JSONObject passengerJson = new JSONObject();
+			passengerJson.put("id", passenger.getId());
+			passengerJson.put("age", passenger.getAge());
+			passengerJson.put("firstName", passenger.getFirstName());
+			passengerJson.put("lastName", passenger.getLastName());
+			passengerJson.put("gender", passenger.getGender());
+			passengerJson.put("phone", passenger.getPhone());
+			passengerJsonList.add(passengerJson);
+		}
 		
-		return json.toString();
+		json.put("passengers", passengerJsonList);
+		
+		return json;
 	}
 
 	// spec 14 - delete a flight
