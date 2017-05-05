@@ -49,6 +49,12 @@ public class Plane{ // implements Serializable{
 	public void setYearOfManufacture(int yearOfManufacture) {
 		this.yearOfManufacture = yearOfManufacture;
 	}
+
+	@Override
+	public String toString() {
+		return "Plane [model=" + model + ", capacity=" + capacity + ", manufacturer=" + manufacturer
+				+ ", yearOfManufacture=" + yearOfManufacture + "]";
+	}
 	
 	
 //	private static final long serialVersionUID = 7730651636315478298L;

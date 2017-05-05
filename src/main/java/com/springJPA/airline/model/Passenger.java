@@ -3,16 +3,23 @@ package com.springJPA.airline.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 //@javax.persistence.Entity(name = "passenger")
 @Entity
@@ -43,15 +50,20 @@ public class Passenger implements Serializable {
 	
 	//maybe circular
 	
-	@OneToMany //(mappedBy="passenger")
-	@JoinTable(name="passenger_reservation", 
-	joinColumns={
-			@JoinColumn(name="id")
-	},
-	inverseJoinColumns={
-			@JoinColumn(name="pid")
-	}
-			)
+//	@OneToMany //(mappedBy="passenger")
+//	@JoinTable(name="passenger_reservation", 
+//	joinColumns={
+//			@JoinColumn(name="pass_id", referencedColumnName="id")
+//	},
+//	inverseJoinColumns={
+//			@JoinColumn(name="res_orderno", referencedColumnName="orderno")
+//	}
+//			)
+	
+	@OneToMany(mappedBy="passenger")
+//	@JsonBackReference
+//	@JsonIgnore
+	@JsonManagedReference
 	private List<Reservation> reservations;
 	
 	protected Passenger() {
@@ -128,6 +140,14 @@ public class Passenger implements Serializable {
 	@Override
 	public int hashCode() {
 		return String.valueOf(this.getId()).hashCode();
+	}
+
+	public List<Reservation> getReservations() {
+		return reservations;
+	}
+
+	public void setReservations(List<Reservation> reservations) {
+		this.reservations = reservations;
 	}
 
 //	public List<Reservation> getReservations() {

@@ -12,8 +12,15 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "flight")
@@ -53,7 +60,14 @@ public class Flight implements Serializable {
 
 	@Embedded
 	private Plane plane;
-
+	
+	@JsonIgnore
+	@ManyToMany(mappedBy="flights")
+	private List<Reservation> reservations;
+	
+	@Transient
+	@JsonManagedReference
+	private List<Passenger> passengers;
 	// @OneToMany
 	// @JoinColumn(na)
 
@@ -170,6 +184,22 @@ public class Flight implements Serializable {
 	@Override
 	public int hashCode() {
 		return this.number.hashCode();
+	}
+
+	public List<Passenger> getPassengers() {
+		return passengers;
+	}
+
+	public void setPassengers(List<Passenger> passengers) {
+		this.passengers = passengers;
+	}
+
+	public List<Reservation> getReservations() {
+		return reservations;
+	}
+
+	public void setReservations(List<Reservation> reservations) {
+		this.reservations = reservations;
 	}
 
 }

@@ -22,10 +22,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.springJPA.airline.repo.PassengerRepository;
 
 @Entity
 @Table(name = "reservation")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="orderno")
 public class Reservation implements Serializable {
 
 	private static final long serialVersionUID = -8261334108709924377L;
@@ -49,24 +54,28 @@ public class Reservation implements Serializable {
 	@Column(name = "price")
 	private int price;
 
+	//TODO: remove
 	@Column(name = "flight_id")
 	private int flight_id;
 	
 	
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 //	@JoinTable(name = "flight_pass_res", joinColumns = {
 //			@JoinColumn(table = "reservation", name = "orderno", referencedColumnName = "orderno"),
 //			@JoinColumn(table="passenger", name="pid", referencedColumnName="id"),
 //			@JoinColumn(table="flight", name="number", referencedColumnName="number")})
+	@ManyToMany(cascade = {CascadeType.ALL},fetch=FetchType.EAGER)
 	@JoinTable(name="reservation_flight", joinColumns = {
-			@JoinColumn(name="orderno")
+			@JoinColumn(name="res_orderno", referencedColumnName="orderno")
 	}, inverseJoinColumns={
-		@JoinColumn(name="number")	
+		@JoinColumn(name="flight_number", referencedColumnName="number")	
 	})
 	private List<Flight> flights;
 
-	@ManyToOne
-	@JoinColumn(name = "pid")
+	@ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+	@JoinColumn(name="pid")
+//	@JsonManagedReference
+	@JsonBackReference
 	private Passenger passenger;
 
 	// public Reservation(String pid, String flights) {

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 //import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpServerErrorException;
 
 import com.springJPA.airline.model.Flight;
 import com.springJPA.airline.model.Passenger;
@@ -34,7 +34,6 @@ import com.springJPA.airline.repo.ReservationRepository;
 @RestController
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class WebController {
-	
 	
 	@Autowired
 	PassengerRepository passRepo;
@@ -52,13 +51,13 @@ public class WebController {
 
 	// Spec1 - Get a passenger using json
 	@RequestMapping(value = "/passenger/{id}", method = { RequestMethod.GET })
-	public ResponseEntity<Passenger> getPassenger(@PathVariable("id") String id,
+	public ResponseEntity<?> getPassenger(@PathVariable("id") String id,
 			@RequestParam(value = "json", defaultValue = "false") Boolean json) {
 		Passenger passenger = passRepo.findOne(Integer.parseInt(id));
 		if (passenger == null) {
-			return new ResponseEntity<Passenger>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.NOT_FOUND.value(),
+					"Not found"), HttpStatus.NOT_FOUND);
 		}
-
 		return new ResponseEntity<Passenger>(passenger, HttpStatus.OK);
 	}
 
@@ -74,13 +73,14 @@ public class WebController {
 
 	// Spec4 - Update a passenger
 	@RequestMapping(value = "/passenger/{idStr}", method = { RequestMethod.PUT })
-	public ResponseEntity<Passenger> updatePassenger(@PathVariable("idStr") String idStr,
+	public ResponseEntity<?> updatePassenger(@PathVariable("idStr") String idStr,
 			@RequestParam String firstname, @RequestParam String lastname, @RequestParam int age,
 			@RequestParam String gender, @RequestParam String phone) {
 		int id = Integer.parseInt(idStr);
 		Passenger passenger = passRepo.findOne(id);
 		if (passenger == null) {
-			return new ResponseEntity<Passenger>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.NOT_FOUND.value(),
+					"Not found"), HttpStatus.NOT_FOUND);
 		}
 
 		passRepo.updatePassengerDetails(firstname, lastname, age, gender, phone, id);
@@ -91,37 +91,42 @@ public class WebController {
 
 	// Spec5 - Delete a passenger
 	@RequestMapping(value = "/passenger/{id}", method = { RequestMethod.DELETE })
-	public String deletePassenger(@PathVariable("id") String id) {
+	public ResponseEntity<?> deletePassenger(@PathVariable("id") String id) {
 		Passenger passenger = passRepo.findOne(Integer.parseInt(id));
 		if (passenger == null) {
-			return "Passenger not present";
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.NOT_FOUND.value(),
+					"Not found"), HttpStatus.NOT_FOUND);
 		}
 
 		passRepo.delete(Integer.parseInt(id));
 
-		return "Passenger deleted";
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	
 	// Spec7 - Make a reservation
 	@RequestMapping(value = "/reservation", method = { RequestMethod.POST })
-	public ResponseEntity<Reservation> makeReservation(@RequestParam String passengerId,
+	public ResponseEntity<?> makeReservation(@RequestParam String passengerId,
 			@RequestParam String flightLists) {
 		if(passengerId == null || passengerId.isEmpty()){
-			//TODO return 400
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
+					"Bad Request. Passender ID not provided in request"), HttpStatus.BAD_REQUEST);
 		}
 		if(flightLists == null || flightLists.isEmpty()){
-			//TODO return 400
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
+					"Bad Request. Flight ID(s) not provided in request"), HttpStatus.BAD_REQUEST);
 		}
 		Passenger passenger = passRepo.findOne(Integer.parseInt(passengerId));
 		if(passenger == null){
-			//TODO 400
+			return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
+					"Passenger with id " +passengerId+ " does not exist"), HttpStatus.BAD_REQUEST);
 		}
 		List<Flight> flights = new ArrayList<>();
-		for(String flightId : flightLists.split("\\[,\\]")){
+		for(String flightId : flightLists.split("\\,")){
 			Flight flight = flightRepo.findOne(flightId);
 			if(flight == null){
-				//TODO 400
+				return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.BAD_REQUEST.value(),
+						"Flight with id "+ flightId+ " does not exist"), HttpStatus.BAD_REQUEST);
 			}
 			flights.add(flight);
 		}
@@ -131,11 +136,8 @@ public class WebController {
 			reservation.setFlights(flights);
 			resRepo.save(reservation);
 		}else{
-			//TODO 400 error overlap
+			return new ResponseEntity<String>("Flights conflicting", HttpStatus.BAD_REQUEST);
 		}
-		
-		
-
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
 
@@ -156,12 +158,13 @@ public class WebController {
 
 	// Spec6 - Get a reservation back as JSON
 	@RequestMapping(value = "/reservation/{id}", method = { RequestMethod.GET })
-	public ResponseEntity<Reservation> getReservation(@PathVariable("id") String id) {
+	public ResponseEntity<?> getReservation(@PathVariable("id") String id) {
 		Reservation res = resRepo.findOne(Integer.valueOf(id));
-		if (res == null)
+		if (res == null){
 			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
-		else
+		}else{
 			return new ResponseEntity<Reservation>(res, HttpStatus.OK);
+		}
 	}
 
 	// Spec8 - Update a reservation
@@ -188,9 +191,8 @@ public class WebController {
 			for (String toRemove : flightsRemoved.split("\\[,\\]")) {
 				boolean wasPresent = flightsInRes.remove(toRemove);
 				if (!wasPresent) {
-					// TODO: Error mesage
-
-					return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
+					return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.NOT_FOUND.value(),
+							"flight id " + toRemove + " not found"), HttpStatus.NOT_FOUND);
 				}
 			}
 			reservation.setFlights(new ArrayList<Flight>(flightsInRes));
@@ -242,15 +244,6 @@ public class WebController {
 		List<Flight> existingFlights = reservation.getFlights();
 		if(existingFlights == null)
 			existingFlights = new ArrayList<Flight>();
-		// populate list
-//		if (reservation.getlistFlights() != null) {
-//			for (String flightID : reservation.getlistFlights()) {
-//				Flight toAdd = flightRepo.findOne(flightID);
-//				if (toAdd != null) {
-//					existingFlights.add(toAdd);
-//				}
-//			}
-//		}
 
 		for (Flight newFlight : flightsAdded) {
 			for (Flight oldFlight : existingFlights) {
@@ -277,24 +270,76 @@ public class WebController {
 			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
 		} else {
 			resRepo.delete(Integer.valueOf(id));
-			// TODO
-			// return new ResponseEntity<String>("Reservation with number XXX is
-			// canceled successfully",
-			// HttpStatus.OK);
 			return new ResponseEntity<Reservation>(HttpStatus.OK);
 		}
 	}
 
 	// spec 11 - Get a flight back as JSON
 	@RequestMapping(value = "/flight/{id}", method = { RequestMethod.GET })
-	public ResponseEntity<Flight> getFlight(@PathVariable("id") String id,
+	public ResponseEntity<?> getFlight(@PathVariable("id") String id,
 			@RequestParam(value = "json", defaultValue = "false") Boolean json) {
 		Flight flight = flightRepo.findOne(id);
 		if (flight == null) {
 			return new ResponseEntity<Flight>(HttpStatus.NOT_FOUND);
 		}
+		
+		//TODO: refactor: hacks 
+		List<Reservation> reservations = flight.getReservations();
+		List<Passenger> passengers = new ArrayList<>();
+		for(Reservation reservation : reservations){
+			passengers.add(reservation.getPassenger());
+		}
+		flight.setPassengers(passengers);
 
-		return new ResponseEntity<Flight>(flight, HttpStatus.OK);
+		return new ResponseEntity<String>(jsonifyFlight(flight), HttpStatus.OK);
+	}
+
+	private String jsonifyFlight(Flight flight) {
+		
+		/*
+		 * 
+		 * "number": "7",
+  "price": 110,
+  "fromSrc": "AA",
+  "toDest": "BB",
+  "departureTime": 1497036600000,
+  "arrivalTime": 1497033000000,
+  "seatsLeft": 0,
+  "description": "EE",
+  "plane": {
+    "model": "HH",
+    "capacity": 10,
+    "manufacturer": "II",
+    "yearOfManufacture": 1997
+  },
+  "passengers": [
+    {
+      "id": 1,
+      "firstName": "Luna",
+      "lastName": "Tic",
+      "age": 11,
+      "gender": "female",
+      "phone": "12",
+		 * 
+		 */
+		JSONObject json = new JSONObject();
+		json.put("number", flight.getNumber());
+		json.put("price", flight.getPrice());
+		json.put("fromSrc", flight.getFromSrc());
+		json.put("toDest", flight.getToDest());
+		json.put("departureTime", flight.getDepartureTime().toString());//TODO
+		json.put("arrivalTime", flight.getArrivalTime());
+		json.put("seatsLeft", flight.getSeatsLeft());
+		json.put("description", flight.getDescription());
+		json.accumulate("plane", new JSONObject(flight.getPlane()));
+		
+		List<Passenger> passengers = flight.getPassengers();
+		for(Passenger passenger : passengers){
+			passenger.setReservations(null);
+		}
+		json.put("passengers", passengers);
+		
+		return json.toString();
 	}
 
 	// spec 14 - delete a flight
