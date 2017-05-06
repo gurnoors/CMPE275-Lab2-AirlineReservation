@@ -63,7 +63,7 @@ public class Passenger implements Serializable {
 //	}
 //			)
 	
-	@OneToMany(mappedBy="passenger")
+	@OneToMany(mappedBy="passenger", cascade = {CascadeType.ALL})
 //	@JsonBackReference
 //	@JsonIgnore
 	@JsonManagedReference

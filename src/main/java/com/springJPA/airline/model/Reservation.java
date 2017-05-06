@@ -40,10 +40,7 @@ public class Reservation implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-//	@Column(name = "orderno")
-//	@JoinTable(name="reservation_list_flights", inverseJoinColumns={
-//			@JoinColumn(table="reservation", name="reservation_orderno", referencedColumnName="orderno")
-//	})
+	@Column(name = "orderno", unique = true, nullable = false)
 	private int orderno;
 
 	// @Column(name = "pid")
@@ -65,7 +62,7 @@ public class Reservation implements Serializable {
 //			@JoinColumn(table = "reservation", name = "orderno", referencedColumnName = "orderno"),
 //			@JoinColumn(table="passenger", name="pid", referencedColumnName="id"),
 //			@JoinColumn(table="flight", name="number", referencedColumnName="number")})
-	@ManyToMany(cascade = {CascadeType.ALL},fetch=FetchType.EAGER)
+	@ManyToMany(fetch=FetchType.EAGER)
 	@JoinTable(name="reservation_flight", joinColumns = {
 			@JoinColumn(name="res_orderno", referencedColumnName="orderno")
 	}, inverseJoinColumns={
@@ -75,8 +72,6 @@ public class Reservation implements Serializable {
 
 	@ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
 	@JoinColumn(name="pid")
-//	@JsonBackReference
-//	@JsonManagedReference
 	@JsonIgnore
 	private Passenger passenger;
 

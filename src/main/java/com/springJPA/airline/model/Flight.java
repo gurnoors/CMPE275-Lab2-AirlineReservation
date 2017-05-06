@@ -62,7 +62,7 @@ public class Flight implements Serializable {
 	private Plane plane;
 	
 	@JsonIgnore
-	@ManyToMany(mappedBy="flights")
+	@ManyToMany(mappedBy="flights", cascade = {CascadeType.ALL})
 	private List<Reservation> reservations;
 	
 //	@Transient

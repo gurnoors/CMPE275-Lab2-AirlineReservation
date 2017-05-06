@@ -21,11 +21,5 @@ public interface PassengerRepository extends CrudRepository<Passenger, Integer>{
 	@Query("update Passenger p set p.firstName=?1, p.lastName=?2, p.age=?3, p.gender=?4, p.phone=?5 where p.id=?6")
 	void updatePassengerDetails(String firstname, String lastname, int age, String gender, String phone, int id);
 	
-	//TODO:
-	//List<Reservation> findReservationsByPass(int passId)
-	
-	//OR, don't clearly remember what Vimanyu told  (just try to implement reqs)
-	
-	//List<Passanger> in some other repo
 	
 }

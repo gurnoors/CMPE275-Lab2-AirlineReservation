@@ -235,11 +235,13 @@ public class WebController {
 						"flightsRemoved String empty. Remove the parameter."), HttpStatus.BAD_REQUEST);
 			}
 			Set<Flight> flightsInRes = new HashSet<Flight>(reservation.getFlights());
-			for (String toRemove : flightsRemoved.split("\\[,\\]")) {
-				boolean wasPresent = flightsInRes.remove(toRemove);
-				if (!wasPresent) {
+			for (String toRemoveStr : flightsRemoved.split("\\,")) {
+				Flight flightToRemove = flightRepo.findOne(flightsRemoved);
+				if(flightToRemove == null){
 					return new ResponseEntity<ControllerError>(new ControllerError(HttpStatus.NOT_FOUND.value(),
-							"flight id " + toRemove + " not found"), HttpStatus.NOT_FOUND);
+							"flight id " + toRemoveStr + " not found"), HttpStatus.NOT_FOUND);
+				}else{
+					flightsInRes.remove(flightToRemove);
 				}
 			}
 			reservation.setFlights(new ArrayList<Flight>(flightsInRes));
@@ -277,6 +279,7 @@ public class WebController {
 		}
 
 		resRepo.save(reservation);
+		
 
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
