@@ -70,7 +70,7 @@ public class Reservation implements Serializable {
 	})
 	private List<Flight> flights;
 
-	@ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="pid")
 	@JsonIgnore
 	private Passenger passenger;
